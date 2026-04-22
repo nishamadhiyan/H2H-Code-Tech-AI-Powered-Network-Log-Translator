@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Network Log Translator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="bg-grid"></div>
+
+  <header>
+    <div class="logo">
+      <span class="logo-icon">⬡</span>
+      <span>NetLog<b>AI</b></span>
+    </div>
+    <p class="tagline">Translate chaos into clarity — instantly</p>
+  </header>
+
+  <main>
+    <section class="card input-card">
+      <h2>📋 Paste or Upload Network Logs</h2>
+      <textarea id="logInput" placeholder="Paste raw network logs here..."></textarea>
+
+      <div class="file-upload">
+        <label for="fileInput">📂 Or upload a .log / .txt file</label>
+        <input type="file" id="fileInput" accept=".log,.txt" />
+      </div>
+
+      <div class="sample-btns">
+        <button class="sample-btn" onclick="loadSample('brute')">🔴 Load Brute Force Sample</button>
+        <button class="sample-btn" onclick="loadSample('ddos')">🟠 Load DDoS Sample</button>
+        <button class="sample-btn" onclick="loadSample('memory')">🟡 Load Memory Overload Sample</button>
+      </div>
+
+      <button id="analyzeBtn" onclick="analyzeLogs()">
+        <span id="btnText">⚡ Analyze Logs</span>
+        <span id="btnLoader" class="hidden">🔍 Analyzing...</span>
+      </button>
+    </section>
+
+    <section class="card result-card hidden" id="results">
+      <div class="severity-badge" id="severityBadge"></div>
+
+      <div class="result-block">
+        <h3>🗣 Plain English Summary</h3>
+        <p id="plainEnglish"></p>
+      </div>
+
+      <div class="result-block">
+        <h3>📊 Log Statistics</h3>
+        <div class="stats-grid" id="statsGrid"></div>
+      </div>
+
+      <div class="result-block">
+        <h3>🚨 Anomalies & Threats</h3>
+        <ul id="anomalyList"></ul>
+      </div>
+
+      <div class="result-block">
+        <h3>🔍 Pattern Summary</h3>
+        <p id="patternSummary"></p>
+      </div>
+
+      <div class="result-block">
+        <h3>🔑 Key Events</h3>
+        <ul id="keyEvents"></ul>
+      </div>
+
+      <div class="result-block">
+        <h3>✅ Suggested Actions</h3>
+        <ul id="suggestions"></ul>
+      </div>
+
+      <div class="result-block">
+        <h3>📄 Log Lines</h3>
+        <div id="logLines"></div>
+      </div>
+
+      <button onclick="exportReport()" class="export-btn">📥 Export Report</button>
+    </section>
+  </main>
+
+  <script src="/static/script.js"></script>
+</body>
+</html>

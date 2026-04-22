@@ -1,0 +1,255 @@
+:root {
+  --bg: #0a0f1e;
+  --surface: #0f1629;
+  --border: #1e3a5f;
+  --accent: #00d4ff;
+  --accent2: #ff6b35;
+  --text: #c9d8f0;
+  --muted: #4a6080;
+  --critical: #ff3860;
+  --warning: #ffdd57;
+  --success: #23d160;
+  --font-mono: 'Share Tech Mono', monospace;
+  --font-display: 'Syne', sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-mono);
+  min-height: 100vh;
+}
+
+.bg-grid {
+  position: fixed; inset: 0; z-index: 0;
+  background-image:
+    linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+
+header {
+  position: relative; z-index: 1;
+  text-align: center;
+  padding: 3rem 1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.logo {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #fff;
+}
+.logo b { color: var(--accent); }
+.logo-icon { margin-right: 0.4rem; color: var(--accent); }
+
+.tagline {
+  margin-top: 0.4rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+main {
+  position: relative; z-index: 1;
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 0 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 2rem;
+}
+
+h2 {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--accent);
+  margin-bottom: 1rem;
+}
+
+h3 {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  color: var(--accent);
+  margin-bottom: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+textarea {
+  width: 100%;
+  height: 200px;
+  background: #060c1a;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  padding: 1rem;
+  resize: vertical;
+  outline: none;
+}
+textarea:focus { border-color: var(--accent); }
+
+.file-upload {
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.file-upload label {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 0.85rem;
+  border: 1px dashed var(--border);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+.file-upload label:hover { border-color: var(--accent); color: var(--accent); }
+.file-upload input { display: none; }
+
+.sample-btns {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.sample-btn {
+  padding: 0.4rem 0.8rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 0;
+  width: auto;
+}
+.sample-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+button {
+  margin-top: 1.5rem;
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(135deg, var(--accent), #0077ff);
+  color: #000;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+button:hover { opacity: 0.9; }
+
+.export-btn {
+  background: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  margin-top: 1rem;
+}
+.export-btn:hover { background: var(--accent); color: #000; }
+
+.severity-badge {
+  display: inline-block;
+  padding: 0.4rem 1.2rem;
+  border-radius: 999px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 1.5rem;
+}
+.sev-LOW    { background: rgba(35,209,96,0.15);  color: var(--success); border: 1px solid var(--success); }
+.sev-MEDIUM { background: rgba(255,221,87,0.15); color: var(--warning); border: 1px solid var(--warning); }
+.sev-HIGH   { background: rgba(255,107,53,0.15); color: var(--accent2); border: 1px solid var(--accent2); }
+.sev-CRITICAL { background: rgba(255,56,96,0.15); color: var(--critical); border: 1px solid var(--critical); }
+
+.result-block {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+.result-block:last-child { border-bottom: none; }
+
+.result-block p {
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+
+ul { list-style: none; padding: 0; }
+ul li {
+  padding: 0.4rem 0 0.4rem 1.2rem;
+  font-size: 0.875rem;
+  position: relative;
+}
+ul li::before { content: "▸"; position: absolute; left: 0; color: var(--accent); }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+.stat-box {
+  background: #060c1a;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+}
+.stat-box .stat-num {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--accent);
+}
+.stat-box .stat-label {
+  font-size: 0.75rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 0.2rem;
+}
+
+.log-line {
+  padding: 0.3rem 0.6rem;
+  margin: 0.2rem 0;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: all 0.2s;
+}
+.log-line:hover { opacity: 0.8; background: #060c1a; }
+.log-CRITICAL { border-left-color: var(--critical); color: var(--critical); }
+.log-ERROR    { border-left-color: var(--accent2); color: var(--accent2); }
+.log-WARNING  { border-left-color: var(--warning); color: var(--warning); }
+.log-INFO     { border-left-color: var(--success); color: var(--success); }
+.log-UNKNOWN  { border-left-color: var(--muted); color: var(--muted); }
+
+.hidden { display: none !important; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.result-card { animation: fadeIn 0.4s ease; }
