@@ -45,5 +45,34 @@ async def explain_line(log_line: str = Form(...)):
     ai_result = translate_logs(parsed)
     return JSONResponse({"explanation": ai_result.get("plain_english_summary", "")})
 
+@app.post("/chat")
+async def chat_with_logs(
+    question: str = Form(...),
+    log_context: str = Form(...)
+):
+    from groq import Groq
+    import os
+    client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+    
+    response = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=[
+            {
+                "role": "system",
+                "content": "You are a network security expert. Answer questions about the network logs provided. Be concise and helpful."
+            },
+            {
+                "role": "user",
+                "content": f"Here are the network logs:\n\n{log_context}\n\nQuestion: {question}"
+            }
+        ],
+        max_tokens=500,
+        temperature=0.3
+    )
+    
+    return JSONResponse({
+        "answer": response.choices[0].message.content.strip()
+    })
+
 if __name__ == "__main__":
     uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)

@@ -67,6 +67,13 @@ function renderResults(data) {
 
   document.getElementById('results').classList.remove('hidden');
 
+  // Show chart
+  renderChart(parsed.severity_counts);
+  
+  // Store logs for chat
+  currentLogs = parsed.parsed_lines.map(p => p.line).join('\n');
+  document.getElementById('chatSection').classList.remove('hidden');
+
   const sev = ai.severity_assessment || 'UNKNOWN';
   const badge = document.getElementById('severityBadge');
   badge.textContent = `⚡ Severity: ${sev}`;
@@ -158,4 +165,94 @@ ${(ai.suggested_actions || []).join('\n')}
   a.href = url;
   a.download = 'network-log-report.txt';
   a.click();
+}
+// ── Chart.js severity chart ──
+function renderChart(sc) {
+  const existing = document.getElementById('severityChart');
+  if (existing) existing.remove();
+
+  const statsGrid = document.getElementById('statsGrid');
+  const canvas = document.createElement('canvas');
+  canvas.id = 'severityChart';
+  canvas.style.marginTop = '1.5rem';
+  canvas.style.maxHeight = '200px';
+  statsGrid.after(canvas);
+
+  new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: ['Critical', 'Error', 'Warning', 'Info', 'Unknown'],
+      datasets: [{
+        label: 'Log Count',
+        data: [
+          sc.CRITICAL || 0,
+          sc.ERROR || 0,
+          sc.WARNING || 0,
+          sc.INFO || 0,
+          sc.UNKNOWN || 0
+        ],
+        backgroundColor: [
+          'rgba(255,56,96,0.7)',
+          'rgba(255,107,53,0.7)',
+          'rgba(255,221,87,0.7)',
+          'rgba(35,209,96,0.7)',
+          'rgba(74,96,128,0.7)'
+        ],
+        borderColor: [
+          '#ff3860','#ff6b35','#ffdd57','#23d160','#4a6080'
+        ],
+        borderWidth: 1,
+        borderRadius: 6,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+      },
+      scales: {
+        x: { ticks: { color: '#4a6080' }, grid: { color: '#1e3a5f' } },
+        y: { ticks: { color: '#4a6080' }, grid: { color: '#1e3a5f' }, beginAtZero: true }
+      }
+    }
+  });
+}
+
+// ── Chat with logs ──
+let currentLogs = '';
+
+async function sendChat() {
+  const input = document.getElementById('chatInput');
+  const question = input.value.trim();
+  if (!question) return;
+
+  addChatMsg(question, 'user');
+  input.value = '';
+  addChatMsg('🤖 Thinking...', 'bot', 'thinking');
+
+  const formData = new FormData();
+  formData.append('question', question);
+  formData.append('log_context', currentLogs);
+
+  const res = await fetch('/chat', { method: 'POST', body: formData });
+  const data = await res.json();
+
+  const thinking = document.querySelector('.thinking');
+  if (thinking) thinking.remove();
+  addChatMsg(data.answer, 'bot');
+}
+
+function askSuggestion(btn) {
+  document.getElementById('chatInput').value = btn.textContent;
+  sendChat();
+}
+
+function addChatMsg(text, type, cls = '') {
+  const messages = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = `chat-msg ${type}-msg ${cls}`;
+  const icon = type === 'bot' ? '🤖' : '👤';
+  div.innerHTML = `<span>${icon}</span><span>${text}</span>`;
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
 }

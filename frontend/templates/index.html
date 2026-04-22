@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 </head>
 <body>
   <div class="bg-grid"></div>
@@ -80,6 +81,30 @@
       </div>
 
       <button onclick="exportReport()" class="export-btn">📥 Export Report</button>
+    </section>
+    <!-- Chat Section -->
+    <section class="card chat-card hidden" id="chatSection">
+      <h2>💬 Chat with your Logs</h2>
+      <p class="chat-subtitle">Ask anything about your analyzed logs</p>
+      
+      <div class="chat-messages" id="chatMessages">
+        <div class="chat-msg bot-msg">
+          <span>🤖</span>
+          <span>Hi! I've analyzed your logs. Ask me anything about them!</span>
+        </div>
+      </div>
+
+      <div class="chat-suggestions">
+        <button class="suggest-btn" onclick="askSuggestion(this)">Which IP is most suspicious?</button>
+        <button class="suggest-btn" onclick="askSuggestion(this)">What should I fix first?</button>
+        <button class="suggest-btn" onclick="askSuggestion(this)">Was there a brute force attack?</button>
+        <button class="suggest-btn" onclick="askSuggestion(this)">Is my server safe?</button>
+      </div>
+
+      <div class="chat-input-row">
+        <input type="text" id="chatInput" placeholder="Ask about your logs..." onkeydown="if(event.key==='Enter') sendChat()" />
+        <button class="chat-send-btn" onclick="sendChat()">Send ➤</button>
+      </div>
     </section>
   </main>
 
