@@ -8,6 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/style.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+  <button onclick="showHistory()" class="history-btn">📋 View History</button>
 </head>
 <body>
   <div class="bg-grid"></div>
@@ -80,6 +81,11 @@
         <div id="logLines"></div>
       </div>
 
+      <div class="result-block" id="ipBlock">
+          <h3>🌍 IP Reputation Check</h3>
+         <div id="ipResults"></div>
+    </div>
+
       <button onclick="exportReport()" class="export-btn">📥 Export Report</button>
     </section>
     <!-- Chat Section -->
@@ -106,6 +112,14 @@
         <button class="chat-send-btn" onclick="sendChat()">Send ➤</button>
       </div>
     </section>
+    <section class="card hidden" id="historySection">
+    <h2>📋 Analysis History</h2>
+  <div id="historyList"></div>
+</section>
+<div class="privacy-notice">
+  🔒 Your logs are processed securely and never stored permanently. 
+  Analysis history is kept locally only. No data is shared with third parties.
+</div>
   </main>
 
   <script src="/static/script.js"></script>

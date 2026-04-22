@@ -336,3 +336,46 @@ ul li::before { content: "▸"; position: absolute; left: 0; color: var(--accent
   padding: 0.7rem 1.2rem;
   font-size: 0.85rem;
 }
+
+.ip-card {
+  background: #060c1a;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.8rem 1rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.82rem;
+  align-items: center;
+}
+.ip-card b { color: var(--accent); }
+
+.history-btn {
+  margin-top: 1rem;
+  width: auto;
+  padding: 0.5rem 1.2rem;
+  background: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-size: 0.85rem;
+}
+
+.history-card {
+  background: #060c1a;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 0.8rem;
+  transition: border-color 0.2s;
+}
+.history-card:hover { border-color: var(--accent); }
+
+.privacy-notice {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.78rem;
+  padding: 1rem;
+  border-top: 1px solid var(--border);
+  margin-top: 2rem;
+}

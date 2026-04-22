@@ -5,3 +5,6 @@ python-multipart
 jinja2
 streamlit
 python-dotenv
+groq
+slowapi
+requests

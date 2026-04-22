@@ -33,6 +33,18 @@ async function analyzeLogs() {
     alert('Please paste logs or upload a file.');
     return;
   }
+  if (fileInput.files.length > 0) {
+    const file = fileInput.files[0];
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (!['log', 'txt'].includes(ext)) {
+      alert('Invalid file type! Only .log and .txt files allowed.');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert('File too large! Maximum size is 5MB.');
+      return;
+    }
+  }
 
   btnText.classList.add('hidden');
   btnLoader.classList.remove('hidden');
@@ -66,6 +78,28 @@ function renderResults(data) {
   const parsed = data.parsed;
 
   document.getElementById('results').classList.remove('hidden');
+
+  // IP Reputation
+const ipResults = data.ip_reputation || [];
+const ipDiv = document.getElementById('ipResults');
+if (ipResults.length > 0) {
+  ipDiv.innerHTML = ipResults.map(ip => {
+    if (ip.error) return `<div class="ip-card">${ip.ip} — check failed</div>`;
+    const flag = ip.is_malicious ? '🚨' : '✅';
+    const color = ip.is_malicious ? '#ff3860' : '#23d160';
+    return `
+      <div class="ip-card" style="border-left: 3px solid ${color}">
+        <span>${flag} <b>${ip.ip}</b></span>
+        <span>🌍 ${ip.country}</span>
+        <span>⚠️ Abuse Score: ${ip.abuse_score}%</span>
+        <span>📋 Reports: ${ip.total_reports}</span>
+        <span>🏢 ${ip.isp}</span>
+      </div>
+    `;
+  }).join('');
+} else {
+  ipDiv.innerHTML = '<p style="color:var(--muted)">No external IPs found</p>';
+}
 
   // Show chart
   renderChart(parsed.severity_counts);
@@ -255,4 +289,35 @@ function addChatMsg(text, type, cls = '') {
   div.innerHTML = `<span>${icon}</span><span>${text}</span>`;
   messages.appendChild(div);
   messages.scrollTop = messages.scrollHeight;
+}
+
+async function showHistory() {
+  const res = await fetch('/history');
+  const data = await res.json();
+  const section = document.getElementById('historySection');
+  section.classList.remove('hidden');
+
+  const colors = {
+    CRITICAL: '#ff3860', HIGH: '#ff6b35',
+    MEDIUM: '#ffdd57', LOW: '#23d160'
+  };
+
+  document.getElementById('historyList').innerHTML =
+    data.history.map(h => `
+      <div class="history-card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="color:${colors[h.severity] || '#fff'};font-weight:bold">
+            ⚡ ${h.severity}
+          </span>
+          <span style="color:var(--muted);font-size:0.8rem">${h.timestamp}</span>
+        </div>
+        <p style="font-size:0.85rem;margin-top:0.5rem">${h.summary}</p>
+        <div style="margin-top:0.5rem;font-size:0.8rem;color:var(--muted)">
+          📝 ${h.total_lines} lines |
+          🚨 ${h.anomalies.join(', ') || 'None'}
+        </div>
+      </div>
+    `).join('') || '<p style="color:var(--muted)">No history yet</p>';
+
+  section.scrollIntoView({ behavior: 'smooth' });
 }
