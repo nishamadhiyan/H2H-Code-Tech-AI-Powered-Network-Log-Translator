@@ -1,28 +1,47 @@
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'backend'))
 from log_parser import parse_logs
-from translator import translate_logs
-import json
 
-sample = """
-Jun 12 10:23:01 server sshd[1234]: Failed password for root from 192.168.1.105 port 22
-Jun 12 10:23:03 server sshd[1234]: Failed password for root from 192.168.1.105 port 22
-Jun 12 10:23:05 server sshd[1234]: Failed password for root from 192.168.1.105 port 22
-Jun 12 10:24:01 server kernel: ERROR eth0: connection timeout to 10.0.0.1
-Jun 12 10:24:45 server nginx: 502 Bad Gateway upstream connect() failed
-Jun 12 10:25:01 server firewall: DENIED TCP 203.0.113.45 -> 192.168.1.1 port 3389
-Jun 12 10:26:00 server kernel: WARNING memory usage exceeded 90% threshold
-Jun 12 10:27:01 server sshd[5678]: Accepted publickey for admin from 10.0.0.5
-"""
+def test_severity_detection():
+    logs = "Jun 12 server: ERROR connection failed"
+    result = parse_logs(logs)
+    assert result["severity_counts"]["ERROR"] == 1
+    print("✅ test_severity_detection passed")
 
-print("=== STEP 1: Parsing logs ===\n")
-result = parse_logs(sample)
+def test_anomaly_detection():
+    logs = """Failed password from 192.168.1.1 port 22
+Failed password from 192.168.1.1 port 22
+Failed password from 192.168.1.1 port 22
+Failed password from 192.168.1.1 port 22
+Failed password from 192.168.1.1 port 22"""
+    result = parse_logs(logs)
+    assert len(result["anomalies_detected"]) > 0
+    print("✅ test_anomaly_detection passed")
 
-print(f"Total lines   : {result['total_lines']}")
-print(f"Severity count: {result['severity_counts']}")
-print(f"Anomalies     : {result['anomalies_detected']}")
-print()
-for item in result['parsed_lines']:
-    print(f"  [{item['severity']:8}] {item['line'][:80]}")
+def test_total_lines():
+    logs = "line one\nline two\nline three"
+    result = parse_logs(logs)
+    assert result["total_lines"] == 3
+    print("✅ test_total_lines passed")
 
-print("\n=== STEP 2: Sending to Claude AI ===\n")
-ai_result = translate_logs(result)
-print(json.dumps(ai_result, indent=2))
+def test_warning_detection():
+    logs = "Jun 12 server: WARNING memory exceeded threshold"
+    result = parse_logs(logs)
+    assert result["severity_counts"]["WARNING"] == 1
+    print("✅ test_warning_detection passed")
+
+def test_info_detection():
+    logs = "Jun 12 server: connection established successfully"
+    result = parse_logs(logs)
+    assert result["severity_counts"]["INFO"] == 1
+    print("✅ test_info_detection passed")
+
+if __name__ == "__main__":
+    print("\n🧪 Running all tests...\n")
+    test_severity_detection()
+    test_anomaly_detection()
+    test_total_lines()
+    test_warning_detection()
+    test_info_detection()
+    print("\n🎉 All tests passed!\n")
