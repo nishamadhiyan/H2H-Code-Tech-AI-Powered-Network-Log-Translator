@@ -8,3 +8,7 @@ python-dotenv
 groq
 slowapi
 requests
+python-jose[cryptography]
+passlib[bcrypt]
+cryptography
+bcrypt==4.0.1
