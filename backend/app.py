@@ -80,21 +80,25 @@ async def index():
         return HTMLResponse(content=f.read())
 
 @app.post("/analyze")
-@limiter.limit("10/minute")
 async def analyze(request: Request, log_text: str = Form(...)):
-    log_text = validate_log_input(log_text)
-    parsed = parse_logs(log_text)
-    ai_result = translate_logs(parsed)
-    save_analysis(parsed, ai_result)
-    ip_results = check_all_ips(log_text) if IP_CHECK_ENABLED else []
-    return JSONResponse({
-        "parsed": parsed,
-        "ai_analysis": ai_result,
-        "ip_reputation": ip_results
-    })
+    try:
+        log_text = validate_log_input(log_text)
+        parsed = parse_logs(log_text)
+        ai_result = translate_logs(parsed)
+        save_analysis(parsed, ai_result)
+        ip_results = check_all_ips(log_text) if IP_CHECK_ENABLED else []
+        return JSONResponse({
+            "parsed": parsed,
+            "ai_analysis": ai_result,
+            "ip_reputation": ip_results
+        })
+    except Exception as e:
+        print(f"ERROR in /analyze: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return JSONResponse({"error": str(e)}, status_code=500)
 
 @app.post("/analyze-file")
-@limiter.limit("5/minute")
 async def analyze_file(request: Request, file: UploadFile = File(...)):
     # File type validation
     allowed_types = ["text/plain", "application/octet-stream"]

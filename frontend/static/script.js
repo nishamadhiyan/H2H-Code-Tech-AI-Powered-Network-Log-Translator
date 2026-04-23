@@ -22,6 +22,7 @@ function logout() {
 // Check auth on page load
 checkAuth();
 
+// Sample logs
 const SAMPLES = {
   brute: `Jun 12 10:23:01 server sshd[1234]: Failed password for root from 192.168.1.105 port 22
 Jun 12 10:23:03 server sshd[1234]: Failed password for root from 192.168.1.105 port 22
@@ -42,23 +43,16 @@ Jun 12 12:00:15 server kernel: CRITICAL RAM overflow detected
 Jun 12 12:00:20 server app: fatal memory allocation failed`
 };
 
-
-// Show disclaimer on first use
-  if (!sessionStorage.getItem('disclaimerShown')) {
-    const agreed = confirm(
-      '🔒 Security Notice\n\n' +
-      '• Your logs are processed securely\n' +
-      '• Sensitive data (passwords, tokens) is automatically masked\n' +
-      '• Analysis history is deleted after 24 hours\n' +
-      '• No data is shared with third parties\n\n' +
-      'Click OK to continue.'
-    );
-    if (!agreed) return;
-    sessionStorage.setItem('disclaimerShown', 'true');
-  }
-
 function loadSample(type) {
   document.getElementById('logInput').value = SAMPLES[type];
+}
+
+function showFileName(input) {
+  if (input.files.length > 0) {
+    document.getElementById('fileName').textContent = input.files[0].name;
+    document.getElementById('fileNameDisplay').style.display = 'block';
+    document.getElementById('fileLabel').textContent = '✅ ' + input.files[0].name;
+  }
 }
 
 async function analyzeLogs() {
@@ -72,6 +66,7 @@ async function analyzeLogs() {
     alert('Please paste logs or upload a file.');
     return;
   }
+
   if (fileInput.files.length > 0) {
     const file = fileInput.files[0];
     const ext = file.name.split('.').pop().toLowerCase();
@@ -83,6 +78,20 @@ async function analyzeLogs() {
       alert('File too large! Maximum size is 50MB.');
       return;
     }
+  }
+
+  // Show disclaimer on first use
+  if (!sessionStorage.getItem('disclaimerShown')) {
+    const agreed = confirm(
+      '🔒 Security Notice\n\n' +
+      '• Your logs are processed securely\n' +
+      '• Sensitive data (passwords, tokens) is automatically masked\n' +
+      '• Analysis history is deleted after 7 days\n' +
+      '• No data is shared with third parties\n\n' +
+      'Click OK to continue.'
+    );
+    if (!agreed) return;
+    sessionStorage.setItem('disclaimerShown', 'true');
   }
 
   btnText.classList.add('hidden');
@@ -121,36 +130,47 @@ async function analyzeLogs() {
 }
 
 function renderResults(data) {
+  if (data.error) {
+    alert('Server error: ' + data.error);
+    return;
+  }
+  if (!data.parsed || !data.ai_analysis) {
+    alert('Invalid response from server');
+    console.log('Response:', data);
+    return;
+  }
   const ai = data.ai_analysis;
   const parsed = data.parsed;
 
   document.getElementById('results').classList.remove('hidden');
 
   // IP Reputation
-const ipResults = data.ip_reputation || [];
-const ipDiv = document.getElementById('ipResults');
-if (ipResults.length > 0) {
-  ipDiv.innerHTML = ipResults.map(ip => {
-    if (ip.error) return `<div class="ip-card">${ip.ip} — check failed</div>`;
-    const flag = ip.is_malicious ? '🚨' : '✅';
-    const color = ip.is_malicious ? '#ff3860' : '#23d160';
-    return `
-      <div class="ip-card" style="border-left: 3px solid ${color}">
-        <span>${flag} <b>${ip.ip}</b></span>
-        <span>🌍 ${ip.country}</span>
-        <span>⚠️ Abuse Score: ${ip.abuse_score}%</span>
-        <span>📋 Reports: ${ip.total_reports}</span>
-        <span>🏢 ${ip.isp}</span>
-      </div>
-    `;
-  }).join('');
-} else {
-  ipDiv.innerHTML = '<p style="color:var(--muted)">No external IPs found</p>';
-}
+  const ipResults = data.ip_reputation || [];
+  const ipDiv = document.getElementById('ipResults');
+  if (ipDiv) {
+    if (ipResults.length > 0) {
+      ipDiv.innerHTML = ipResults.map(ip => {
+        if (ip.error) return `<div class="ip-card">${ip.ip} — check failed</div>`;
+        const flag = ip.is_malicious ? '🚨' : '✅';
+        const color = ip.is_malicious ? '#ff3860' : '#23d160';
+        return `
+          <div class="ip-card" style="border-left: 3px solid ${color}">
+            <span>${flag} <b>${ip.ip}</b></span>
+            <span>🌍 ${ip.country}</span>
+            <span>⚠️ Abuse Score: ${ip.abuse_score}%</span>
+            <span>📋 Reports: ${ip.total_reports}</span>
+            <span>🏢 ${ip.isp}</span>
+          </div>
+        `;
+      }).join('');
+    } else {
+      ipDiv.innerHTML = '<p style="color:var(--muted)">No external IPs found</p>';
+    }
+  }
 
   // Show chart
   renderChart(parsed.severity_counts);
-  
+
   // Store logs for chat
   currentLogs = parsed.parsed_lines.map(p => p.line).join('\n');
   document.getElementById('chatSection').classList.remove('hidden');
@@ -195,16 +215,21 @@ if (ipResults.length > 0) {
   `).join('');
 
   document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
-
   window._lastData = data;
 }
 
-const res = await fetch('/explain-line', {
+async function explainLine(el, line) {
+  el.innerHTML += ' <span style="color:#00d4ff">⏳ explaining...</span>';
+  const formData = new FormData();
+  formData.append('log_line', line);
+  const res = await fetch('/explain-line', {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${getToken()}` },
     body: formData
   });
- 
+  const data = await res.json();
+  el.innerHTML = `<span style="color:#00d4ff">💡 ${data.explanation}</span>`;
+}
 
 function exportReport() {
   const data = window._lastData;
@@ -245,7 +270,8 @@ ${(ai.suggested_actions || []).join('\n')}
   a.download = 'network-log-report.txt';
   a.click();
 }
-// ── Chart.js severity chart ──
+
+// Chart.js severity chart
 function renderChart(sc) {
   const existing = document.getElementById('severityChart');
   if (existing) existing.remove();
@@ -277,18 +303,14 @@ function renderChart(sc) {
           'rgba(35,209,96,0.7)',
           'rgba(74,96,128,0.7)'
         ],
-        borderColor: [
-          '#ff3860','#ff6b35','#ffdd57','#23d160','#4a6080'
-        ],
+        borderColor: ['#ff3860','#ff6b35','#ffdd57','#23d160','#4a6080'],
         borderWidth: 1,
         borderRadius: 6,
       }]
     },
     options: {
       responsive: true,
-      plugins: {
-        legend: { display: false },
-      },
+      plugins: { legend: { display: false } },
       scales: {
         x: { ticks: { color: '#4a6080' }, grid: { color: '#1e3a5f' } },
         y: { ticks: { color: '#4a6080' }, grid: { color: '#1e3a5f' }, beginAtZero: true }
@@ -297,7 +319,7 @@ function renderChart(sc) {
   });
 }
 
-// ── Chat with logs ──
+// Chat with logs
 let currentLogs = '';
 
 async function sendChat() {
@@ -318,6 +340,7 @@ async function sendChat() {
     headers: { 'Authorization': `Bearer ${getToken()}` },
     body: formData
   });
+  const data = await res.json();
 
   const thinking = document.querySelector('.thinking');
   if (thinking) thinking.remove();
@@ -340,10 +363,13 @@ function addChatMsg(text, type, cls = '') {
 }
 
 async function showHistory() {
- const res = await fetch('/history', {
+  const res = await fetch('/history', {
     headers: { 'Authorization': `Bearer ${getToken()}` }
   });
-  
+  const data = await res.json();
+  const section = document.getElementById('historySection');
+  section.classList.remove('hidden');
+
   const colors = {
     CRITICAL: '#ff3860', HIGH: '#ff6b35',
     MEDIUM: '#ffdd57', LOW: '#23d160'
@@ -363,19 +389,46 @@ async function showHistory() {
           📝 ${h.total_lines} lines |
           🚨 ${h.anomalies.join(', ') || 'None'}
         </div>
-         <div style="margin-top:0.5rem;display:flex;justify-content:space-between;align-items:center">
+        <div style="margin-top:0.5rem;display:flex;justify-content:space-between;align-items:center">
           <span style="font-size:0.75rem;color:${h.days_left <= 1 ? '#ff3860' : '#ffdd57'}">
             ⏳ Expires in ${h.days_left} day${h.days_left !== 1 ? 's' : ''}
           </span>
-          <button onclick="exportSingle(${JSON.stringify(h).replace(/"/g, '&quot;')})" 
+          <button onclick="exportSingle(${JSON.stringify(h).replace(/"/g, '&quot;')})"
             class="sample-btn" style="font-size:0.75rem">
             📥 Export
           </button>
+        </div>
       </div>
     `).join('') || '<p style="color:var(--muted)">No history yet</p>';
 
   section.scrollIntoView({ behavior: 'smooth' });
 }
+
+function exportSingle(h) {
+  const report = `
+AI NETWORK LOG TRANSLATOR — SAVED REPORT
+==========================================
+Date     : ${h.timestamp}
+Severity : ${h.severity}
+Lines    : ${h.total_lines}
+
+SUMMARY
+-------
+${h.summary}
+
+ANOMALIES
+---------
+${h.anomalies.join('\n') || 'None'}
+  `.trim();
+
+  const blob = new Blob([report], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `log-report-${h.timestamp.replace(/[: ]/g, '-')}.txt`;
+  a.click();
+}
+
 // Show username in header
 document.addEventListener('DOMContentLoaded', () => {
   const el = document.getElementById('usernameDisplay');

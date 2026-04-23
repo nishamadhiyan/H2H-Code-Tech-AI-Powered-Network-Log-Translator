@@ -10,5 +10,23 @@
     "hashed_password": "$2b$12$uEmdTI6e8zMCsEZP1LCIq.gk/T4aIqO0D4UXPEf5hAkq9CL5oqGvq",
     "email": "nishamadhiyan3011@gmail.com",
     "full_name": "Nisha M"
+  },
+  "kmkusuma": {
+    "username": "kmkusuma",
+    "hashed_password": "$2b$12$a5kU55ii5eI4/dRLjqZk/eRyrgAfDjZceS0wXvLXG2VL4kDOYDTv2",
+    "email": "Kusuma99.tech@gmail.com",
+    "full_name": "K M Kusuma"
+  },
+  "KarthikM": {
+    "username": "KarthikM",
+    "hashed_password": "$2b$12$cs2//4jGq7PxwiiWVEy2OOE1Xvu0wVIUk/IgO2oZfxuTsYhUv7Zoq",
+    "email": "wtfkarthik@gmail.com",
+    "full_name": "Karthik M"
+  },
+  "mnisha": {
+    "username": "mnisha",
+    "hashed_password": "$2b$12$zs8Ioa85z8o8Dv3V3vj96uoGlaGbq7N3q4N6sR7h.o5aKflz4/47e",
+    "email": "nishamadhiyan3011@gmail.com",
+    "full_name": "Nisha M"
   }
 }

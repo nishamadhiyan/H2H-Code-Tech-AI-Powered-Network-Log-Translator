@@ -24,7 +24,7 @@
       <span id="usernameDisplay">👤 User</span>
       <button onclick="logout()" class="logout-btn">Logout</button>
     </div>
-  </div>
+  </div>bot
   <p class="tagline">Translate chaos into clarity — instantly</p>
 </header>
 
@@ -34,9 +34,12 @@
       <textarea id="logInput" placeholder="Paste raw network logs here..."></textarea>
 
       <div class="file-upload">
-        <label for="fileInput">📂 Or upload a .log / .txt file</label>
-        <input type="file" id="fileInput" accept=".log,.txt" />
-      </div>
+  <label for="fileInput" id="fileLabel">📂 Or upload a .log / .txt file</label>
+  <input type="file" id="fileInput" accept=".log,.txt" onchange="showFileName(this)"/>
+</div>
+<div id="fileNameDisplay" style="color:#23d160;font-size:0.82rem;margin-top:0.5rem;display:none">
+  ✅ File loaded: <span id="fileName"></span>
+</div>
 
       <div class="sample-btns">
         <button class="sample-btn" onclick="loadSample('brute')">🔴 Load Brute Force Sample</button>
