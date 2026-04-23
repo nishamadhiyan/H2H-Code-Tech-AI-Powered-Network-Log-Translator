@@ -14,12 +14,19 @@
   <div class="bg-grid"></div>
 
   <header>
+    <header>
+  <div class="header-top">
     <div class="logo">
       <span class="logo-icon">⬡</span>
       <span>NetLog<b>AI</b></span>
     </div>
-    <p class="tagline">Translate chaos into clarity — instantly</p>
-  </header>
+    <div class="user-info">
+      <span id="usernameDisplay">👤 User</span>
+      <button onclick="logout()" class="logout-btn">Logout</button>
+    </div>
+  </div>
+  <p class="tagline">Translate chaos into clarity — instantly</p>
+</header>
 
   <main>
     <section class="card input-card">
@@ -117,8 +124,11 @@
   <div id="historyList"></div>
 </section>
 <div class="privacy-notice">
-  🔒 Your logs are processed securely and never stored permanently. 
-  Analysis history is kept locally only. No data is shared with third parties.
+  🔒 Your logs are processed securely | 
+  🛡️ Sensitive data is auto-masked | 
+  ⏳ History kept for 7 days then auto-deleted | 
+  📥 Export anytime before deletion |
+  🚫 No data shared with third parties
 </div>
   </main>
 

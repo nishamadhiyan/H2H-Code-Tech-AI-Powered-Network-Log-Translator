@@ -17,6 +17,7 @@ ANOMALY_PATTERNS = {
 }
 
 def parse_logs(raw_text: str) -> dict:
+    raw_text = mask_sensitive_data(raw_text)  # ADD THIS LINE
     lines = [l.strip() for l in raw_text.strip().split("\n") if l.strip()]
 
     severity_counts = {"CRITICAL": 0, "ERROR": 0, "WARNING": 0, "INFO": 0, "UNKNOWN": 0}
@@ -43,3 +44,16 @@ def parse_logs(raw_text: str) -> dict:
         "anomalies_detected": anomalies,
         "raw": raw_text,
     }
+def mask_sensitive_data(text: str) -> str:
+    import re
+    # Mask passwords
+    text = re.sub(r'(password[=:\s]+)\S+', r'\1[MASKED]', text, flags=re.IGNORECASE)
+    # Mask API keys
+    text = re.sub(r'(api[_-]?key[=:\s]+)\S+', r'\1[MASKED]', text, flags=re.IGNORECASE)
+    # Mask tokens
+    text = re.sub(r'(token[=:\s]+)\S+', r'\1[MASKED]', text, flags=re.IGNORECASE)
+    # Mask credit cards
+    text = re.sub(r'\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b', '[CARD MASKED]', text)
+    # Mask emails
+    text = re.sub(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', '[EMAIL MASKED]', text)
+    return text

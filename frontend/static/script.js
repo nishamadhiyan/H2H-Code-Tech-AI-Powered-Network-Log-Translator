@@ -1,3 +1,27 @@
+// Auth helpers
+function getToken() {
+  return localStorage.getItem('token');
+}
+
+function getUsername() {
+  return localStorage.getItem('username') || 'User';
+}
+
+function checkAuth() {
+  if (!getToken()) {
+    window.location.href = '/login';
+  }
+}
+
+function logout() {
+  localStorage.removeItem('token');
+  localStorage.removeItem('username');
+  window.location.href = '/login';
+}
+
+// Check auth on page load
+checkAuth();
+
 const SAMPLES = {
   brute: `Jun 12 10:23:01 server sshd[1234]: Failed password for root from 192.168.1.105 port 22
 Jun 12 10:23:03 server sshd[1234]: Failed password for root from 192.168.1.105 port 22
@@ -17,6 +41,21 @@ Jun 12 12:00:10 server kernel: ERROR out of memory killing process nginx
 Jun 12 12:00:15 server kernel: CRITICAL RAM overflow detected
 Jun 12 12:00:20 server app: fatal memory allocation failed`
 };
+
+
+// Show disclaimer on first use
+  if (!sessionStorage.getItem('disclaimerShown')) {
+    const agreed = confirm(
+      '🔒 Security Notice\n\n' +
+      '• Your logs are processed securely\n' +
+      '• Sensitive data (passwords, tokens) is automatically masked\n' +
+      '• Analysis history is deleted after 24 hours\n' +
+      '• No data is shared with third parties\n\n' +
+      'Click OK to continue.'
+    );
+    if (!agreed) return;
+    sessionStorage.setItem('disclaimerShown', 'true');
+  }
 
 function loadSample(type) {
   document.getElementById('logInput').value = SAMPLES[type];
@@ -40,8 +79,8 @@ async function analyzeLogs() {
       alert('Invalid file type! Only .log and .txt files allowed.');
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      alert('File too large! Maximum size is 5MB.');
+    if (file.size > 50 * 1024 * 1024) {
+      alert('File too large! Maximum size is 50MB.');
       return;
     }
   }
@@ -55,12 +94,20 @@ async function analyzeLogs() {
     if (fileInput.files.length > 0) {
       const formData = new FormData();
       formData.append('file', fileInput.files[0]);
-      const res = await fetch('/analyze-file', { method: 'POST', body: formData });
+      const res = await fetch('/analyze-file', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${getToken()}` },
+        body: formData
+      });
       data = await res.json();
     } else {
       const formData = new FormData();
       formData.append('log_text', logText);
-      const res = await fetch('/analyze', { method: 'POST', body: formData });
+      const res = await fetch('/analyze', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${getToken()}` },
+        body: formData
+      });
       data = await res.json();
     }
     renderResults(data);
@@ -152,14 +199,12 @@ if (ipResults.length > 0) {
   window._lastData = data;
 }
 
-async function explainLine(el, line) {
-  el.innerHTML += ' <span style="color:#00d4ff">⏳ explaining...</span>';
-  const formData = new FormData();
-  formData.append('log_line', line);
-  const res = await fetch('/explain-line', { method: 'POST', body: formData });
-  const data = await res.json();
-  el.innerHTML = `<span style="color:#00d4ff">💡 ${data.explanation}</span>`;
-}
+const res = await fetch('/explain-line', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${getToken()}` },
+    body: formData
+  });
+ 
 
 function exportReport() {
   const data = window._lastData;
@@ -268,8 +313,11 @@ async function sendChat() {
   formData.append('question', question);
   formData.append('log_context', currentLogs);
 
-  const res = await fetch('/chat', { method: 'POST', body: formData });
-  const data = await res.json();
+  const res = await fetch('/chat', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${getToken()}` },
+    body: formData
+  });
 
   const thinking = document.querySelector('.thinking');
   if (thinking) thinking.remove();
@@ -292,11 +340,10 @@ function addChatMsg(text, type, cls = '') {
 }
 
 async function showHistory() {
-  const res = await fetch('/history');
-  const data = await res.json();
-  const section = document.getElementById('historySection');
-  section.classList.remove('hidden');
-
+ const res = await fetch('/history', {
+    headers: { 'Authorization': `Bearer ${getToken()}` }
+  });
+  
   const colors = {
     CRITICAL: '#ff3860', HIGH: '#ff6b35',
     MEDIUM: '#ffdd57', LOW: '#23d160'
@@ -316,8 +363,21 @@ async function showHistory() {
           📝 ${h.total_lines} lines |
           🚨 ${h.anomalies.join(', ') || 'None'}
         </div>
+         <div style="margin-top:0.5rem;display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:0.75rem;color:${h.days_left <= 1 ? '#ff3860' : '#ffdd57'}">
+            ⏳ Expires in ${h.days_left} day${h.days_left !== 1 ? 's' : ''}
+          </span>
+          <button onclick="exportSingle(${JSON.stringify(h).replace(/"/g, '&quot;')})" 
+            class="sample-btn" style="font-size:0.75rem">
+            📥 Export
+          </button>
       </div>
     `).join('') || '<p style="color:var(--muted)">No history yet</p>';
 
   section.scrollIntoView({ behavior: 'smooth' });
 }
+// Show username in header
+document.addEventListener('DOMContentLoaded', () => {
+  const el = document.getElementById('usernameDisplay');
+  if (el) el.textContent = '👤 ' + getUsername();
+});

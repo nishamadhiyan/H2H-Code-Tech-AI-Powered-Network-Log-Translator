@@ -379,3 +379,30 @@ ul li::before { content: "▸"; position: absolute; left: 0; color: var(--accent
   border-top: 1px solid var(--border);
   margin-top: 2rem;
 }
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.logout-btn {
+  margin-top: 0;
+  width: auto;
+  padding: 0.3rem 0.8rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.logout-btn:hover { border-color: #ff3860; color: #ff3860; }

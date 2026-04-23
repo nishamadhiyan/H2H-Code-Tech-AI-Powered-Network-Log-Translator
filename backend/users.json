@@ -1,0 +1,14 @@
+{
+  "admin": {
+    "username": "admin",
+    "hashed_password": "$2b$12$ZLAzAMi0MW7iPPE0yr3zie3zMbzhuyprlJfRr5T2aDO53.KDOFqYG",
+    "email": "admin@netlogai.com",
+    "full_name": "Admin User"
+  },
+  "nisham": {
+    "username": "nisham",
+    "hashed_password": "$2b$12$uEmdTI6e8zMCsEZP1LCIq.gk/T4aIqO0D4UXPEf5hAkq9CL5oqGvq",
+    "email": "nishamadhiyan3011@gmail.com",
+    "full_name": "Nisha M"
+  }
+}

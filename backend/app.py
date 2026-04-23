@@ -1,4 +1,6 @@
-from fastapi import FastAPI, Request, Form, UploadFile, File, HTTPException
+from auth import authenticate_user, create_access_token, get_current_user, register_user
+from fastapi.security import OAuth2PasswordRequestForm
+from fastapi import FastAPI, Request, Form, UploadFile, File, HTTPException,Depends
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
@@ -51,7 +53,7 @@ app.add_middleware(
 async def add_security_headers(request: Request, call_next):
     response = await call_next(request)
     response.headers["X-Content-Type-Options"] = "nosniff"
-    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
     response.headers["X-XSS-Protection"] = "1; mode=block"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     return response
@@ -107,10 +109,10 @@ async def analyze_file(request: Request, file: UploadFile = File(...)):
     
     # File size validation (5MB max)
     content = await file.read()
-    if len(content) > 5 * 1024 * 1024:
+    if len(content) > 50 * 1024 * 1024:
         raise HTTPException(
             status_code=400,
-            detail="File too large. Maximum size is 5MB"
+            detail="File too large. Maximum size is 50MB"
         )
     
     log_text = content.decode("utf-8", errors="ignore")
@@ -187,6 +189,39 @@ async def health():
         "status": "healthy",
         "version": "1.0.0"
     })
+@app.get("/login", response_class=HTMLResponse)
+async def login_page():
+    html_path = os.path.join(BASE_DIR, "frontend", "templates", "login.html")
+    with open(html_path, "r", encoding="utf-8") as f:
+        return HTMLResponse(content=f.read())
+
+@app.post("/token")
+async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    user = authenticate_user(form_data.username, form_data.password)
+    if not user:
+        raise HTTPException(
+            status_code=401,
+            detail="Incorrect username or password"
+        )
+    token = create_access_token({"sub": user["username"]})
+    return {"access_token": token, "token_type": "bearer"}
+
+@app.post("/register")
+async def register(
+    username: str = Form(...),
+    password: str = Form(...),
+    email: str = Form(...),
+    full_name: str = Form(...)
+):
+    return register_user(username, password, email, full_name)
+
+@app.get("/me")
+async def get_me(current_user: dict = Depends(get_current_user)):
+    return {
+        "username": current_user["username"],
+        "email": current_user["email"],
+        "full_name": current_user["full_name"]
+    }
 
 if __name__ == "__main__":
     uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
