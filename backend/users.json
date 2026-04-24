@@ -34,5 +34,11 @@
     "hashed_password": "$2b$12$TCc0fr6tbW8gy/M0Pzsmtez9SgHc5Gu61ga77p0MkntUdFkesFQrO",
     "email": "shalinimadhiyan2203@gmail.com",
     "full_name": "Shalini M"
+  },
+  "nishakarthik": {
+    "username": "nishakarthik",
+    "hashed_password": "$2b$12$V532BFj89.f3BVNcc.5UqOUx7csbjGGnJHYR0dnJg0GovHvnVgSJ2",
+    "email": "nishamadhiyan3011@gmail.com",
+    "full_name": "Nisha M"
   }
 }
