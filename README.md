@@ -223,7 +223,7 @@ Password: admin123
 > Non-technical friendly interface with metrics and charts
 
 ### 🎥 Demo Video
-> 📹 [Watch Full Demo on YouTube](#) — 3-5 minute walkthrough
+> 📹 [Watch Full Demo on YouTube](https://youtu.be/AiA3NMEOT0w) — 3-5 minute walkthrough
 
 ---
 
